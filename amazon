@@ -1,0 +1,35 @@
+#!/Users/chenminhua/anaconda/bin/python
+#coding=utf8
+from bs4 import BeautifulSoup
+import urllib2
+import sys
+import datetime
+import os
+
+url = "https://www.amazon.cn/gp/product/B00M6OSG40/"
+path = os.getenv("HOME")+"/.amz_product"
+product = sys.argv[1]
+url = sys.argv[2]
+fullpath = "{}/{}".format(path, product)
+
+def getItem(product,url):
+    req = urllib2.Request(url)
+    req.add_header('User-Agent', 'Mozilla/6.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/8.0 Mobile/10A5376e Safari/8536.25')
+    text = urllib2.urlopen(req).read()
+    soup = BeautifulSoup(text, 'html.parser')
+    price = soup.find("span",{"id":"priceblock_ourprice"}).get_text()[1:]
+
+
+    if float(price.strip().replace(",","")):
+        with open(fullpath, "a+") as f:
+            f.write("{} # {}\n".format(datetime.datetime.now(), float(price.strip().replace(",",""))))
+
+
+
+if not os.path.exists(path):
+    os.system("mkdir {}".format(path))
+
+if not os.path.exists(fullpath):
+    os.system("touch {}".format(fullpath))
+
+getItem(product,url)
